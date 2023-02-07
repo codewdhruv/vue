@@ -57,7 +57,12 @@ pipeline:
                       cache: "'pnpm'"
                   when:
                     stageStatus: All
-                  failureStrategies: []
+                  failureStrategies:
+                    - onFailure:
+                        errors:
+                          - AllErrors
+                        action:
+                          type: MarkAsSuccess
               - step:
                   type: Run
                   name: pnpm install
@@ -75,6 +80,88 @@ pipeline:
                   spec:
                     shell: Sh
                     command: pnpm run test:unit
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+    - stage:
+        name: ssr-sfc-test
+        identifier: ssrsfctest
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Action
+                  name: checkout
+                  identifier: checkout
+                  spec:
+                    uses: actions/checkout@v2
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+              - step:
+                  type: Action
+                  name: Install pnpm
+                  identifier: Install_pnpm
+                  spec:
+                    uses: pnpm/action-setup@v2
+                    with:
+                      version: 7.26.3
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+              - step:
+                  type: Action
+                  name: Set node version to 16
+                  identifier: Set_node_version_to_16
+                  spec:
+                    uses: actions/setup-node@v2
+                    with:
+                      nodeversion: "16"
+                      cache: "'pnpm'"
+                  when:
+                    stageStatus: All
+                  failureStrategies:
+                    - onFailure:
+                        errors:
+                          - AllErrors
+                        action:
+                          type: MarkAsSuccess
+              - step:
+                  type: Run
+                  name: pnpm install
+                  identifier: pnpm_install
+                  spec:
+                    shell: Sh
+                    command: pnpm install
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+              - step:
+                  type: Run
+                  name: Run SSR tests
+                  identifier: Run_SSR_tests
+                  spec:
+                    shell: Sh
+                    command: pnpm run test:ssr
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+              - step:
+                  type: Run
+                  name: Run compiler-sfc tests
+                  identifier: Run_compilersfc_tests
+                  spec:
+                    shell: Sh
+                    command: pnpm run test:sfc
                   when:
                     stageStatus: All
                   failureStrategies: []
