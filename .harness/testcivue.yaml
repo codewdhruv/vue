@@ -1,0 +1,78 @@
+pipeline:
+  name: test-ci-vue
+  identifier: testcivue
+  projectIdentifier: NgLabs
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: gitconnectordhruba
+        repoName: vue
+        build: <+input>
+  stages:
+    - stage:
+        name: unit-test
+        identifier: unittest
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Action
+                  name: checkout
+                  identifier: checkout
+                  spec:
+                    uses: actions/checkout@v2
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+              - step:
+                  type: Action
+                  name: Install pnpm
+                  identifier: Install_pnpm
+                  spec:
+                    uses: pnpm/action-setup@v2
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+              - step:
+                  type: Action
+                  name: Set node version to 16
+                  identifier: Set_node_version_to_16
+                  spec:
+                    uses: actions/setup-node@v2
+                    with:
+                      nodeversion: "16"
+                      cache: "'pnpm'"
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+              - step:
+                  type: Run
+                  name: pnpm install
+                  identifier: pnpm_install
+                  spec:
+                    shell: Sh
+                    command: pnpm install
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+              - step:
+                  type: Run
+                  name: Run unit tests
+                  identifier: Run_unit_tests
+                  spec:
+                    shell: Sh
+                    command: pnpm run test:unit
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
