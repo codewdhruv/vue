@@ -247,3 +247,85 @@ pipeline:
                   when:
                     stageStatus: All
                   failureStrategies: []
+    - stage:
+        name: type-test
+        identifier: typetest
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Action
+                  name: checkout
+                  identifier: checkout
+                  spec:
+                    uses: actions/checkout@v2
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+              - step:
+                  type: Action
+                  name: Install pnpm
+                  identifier: Install_pnpm
+                  spec:
+                    uses: pnpm/action-setup@v2
+                    with:
+                      version: 7.26.3
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+              - step:
+                  type: Action
+                  name: Set node version to 16
+                  identifier: Set_node_version_to_16
+                  spec:
+                    uses: actions/setup-node@v2
+                    with:
+                      nodeversion: "16"
+                      cache: "'pnpm'"
+                  when:
+                    stageStatus: All
+                  failureStrategies:
+                    - onFailure:
+                        errors:
+                          - AllErrors
+                        action:
+                          type: MarkAsSuccess
+              - step:
+                  type: Run
+                  name: pnpm install
+                  identifier: pnpm_install
+                  spec:
+                    shell: Sh
+                    command: pnpm install
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+              - step:
+                  type: Run
+                  name: Run source type check
+                  identifier: Run_source_type_check
+                  spec:
+                    shell: Sh
+                    command: pnpm run ts-check
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
+              - step:
+                  type: Run
+                  name: Run type declarative tests
+                  identifier: Run_type_declarative_tests
+                  spec:
+                    shell: Sh
+                    command: pnpm run test:types
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
