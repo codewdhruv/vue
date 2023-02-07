@@ -41,6 +41,8 @@ pipeline:
                   identifier: Install_pnpm
                   spec:
                     uses: pnpm/action-setup@v2
+                    with:
+                      pnpm-version: 7.26.3
                   when:
                     stageStatus: All
                   failureStrategies: []
